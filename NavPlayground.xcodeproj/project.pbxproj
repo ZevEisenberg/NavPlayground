@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7A1459AA279DFB2200A53E7E /* RootFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A1459A9279DFB2200A53E7E /* RootFeature */; };
 		7A41D0A1279C93740038D9BF /* NavPlaygroundApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D0A0279C93740038D9BF /* NavPlaygroundApp.swift */; };
 		7A41D0A3279C93740038D9BF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D0A2279C93740038D9BF /* ContentView.swift */; };
 		7A41D0A5279C93750038D9BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A41D0A4279C93750038D9BF /* Assets.xcassets */; };
@@ -19,6 +20,7 @@
 		7A41D0A2279C93740038D9BF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7A41D0A4279C93750038D9BF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7A41D0A7279C93750038D9BF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		7A41D0B4279C94980038D9BF /* Packages */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Packages; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -26,6 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A1459AA279DFB2200A53E7E /* RootFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -35,8 +38,10 @@
 		7A41D094279C93740038D9BF = {
 			isa = PBXGroup;
 			children = (
+				7A41D0B3279C94980038D9BF /* Packages */,
 				7A41D09F279C93740038D9BF /* NavPlayground */,
 				7A41D09E279C93740038D9BF /* Products */,
+				7A691DE3279C9DDD00A1674B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +72,21 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		7A41D0B3279C94980038D9BF /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				7A41D0B4279C94980038D9BF /* Packages */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		7A691DE3279C9DDD00A1674B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -83,6 +103,9 @@
 			dependencies = (
 			);
 			name = NavPlayground;
+			packageProductDependencies = (
+				7A1459A9279DFB2200A53E7E /* RootFeature */,
+			);
 			productName = NavPlayground;
 			productReference = 7A41D09D279C93740038D9BF /* NavPlayground.app */;
 			productType = "com.apple.product-type.application";
@@ -341,6 +364,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7A1459A9279DFB2200A53E7E /* RootFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RootFeature;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7A41D095279C93740038D9BF /* Project object */;
 }

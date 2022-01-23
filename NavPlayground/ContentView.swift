@@ -1,16 +1,20 @@
-//
-//  ContentView.swift
-//  NavPlayground
-//
-//  Created by Zev Eisenberg on 1/22/22.
-//
-
 import SwiftUI
+import RootFeature
 
 struct ContentView: View {
+
+    let store = RootView.Store(
+        initialState: .init(),
+        reducer: rootReducer,
+        environment: .init(
+            mainQueue: .main
+        )
+    )
+
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        RootView(
+            store: store
+        )
     }
 }
 
