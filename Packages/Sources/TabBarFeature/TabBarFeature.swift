@@ -4,6 +4,7 @@ import AutoTCA
 import CoordinatorFeature
 import SettingsFeature
 import ColorsFeature
+import HomeFeature
 
 extension TabBarView: AutoTCA {
     public struct State: Equatable {
@@ -15,27 +16,39 @@ extension TabBarView: AutoTCA {
 
         public var tab: Tab
         public var coordinator: CoordinatorView.State
-        public var settings: SettingsView.State
-        public var colors: ColorsView.State
+        public var home: HomeView.State
+        public var settings: SettingsView.State {
+            get {
+                home.settings
+            }
+            set {
+                home.settings = newValue
+            }
+        }
+        public var colors: ColorsView.State {
+            get {
+                home.colors
+            }
+            set {
+                home.colors = newValue
+            }
+        }
 
         public init(
             tab: TabBarView.State.Tab = .home,
-            coordinator: CoordinatorView.State = .init(routes: [
-                .root(.home(.init(settings: .initial, colors: .initial)))
-            ]),
-            settings: SettingsView.State = .initial,
-            colors: ColorsView.State = .initial
+            home: HomeView.State = .init(settings: .initial, colors: .initial),
+            coordinator: CoordinatorView.State
         ) {
             self.tab = tab
+            self.home = home
             self.coordinator = coordinator
-            self.settings = settings
-            self.colors = colors
         }
     }
 
-    public enum Action {
+    public enum Action: Equatable {
         case selectedTab(State.Tab)
         case coordinator(CoordinatorView.Action)
+        case home(HomeView.Action)
         case settings(SettingsView.Action)
         case colors(ColorsView.Action)
     }
@@ -47,13 +60,18 @@ public let tabBarReducer = TabBarView.Reducer.combine(
         case .selectedTab(let tab):
             state.tab = tab
             return .none
-        case .coordinator, .settings, .colors:
+        case .coordinator, .settings, .colors, .home:
             return .none
         }
     },
     coordinatorReducer.pullback(
         state: \.coordinator,
         action: /TabBarView.Action.coordinator,
+        environment: { _ in }
+    ),
+    homeReducer.pullback(
+        state: \.home,
+        action: /TabBarView.Action.home,
         environment: { _ in }
     ),
     settingsReducer.pullback(
@@ -67,7 +85,6 @@ public let tabBarReducer = TabBarView.Reducer.combine(
         environment: { _ in }
     )
 )
-
 
 public struct TabBarView: View {
     let store: Self.Store
@@ -109,7 +126,9 @@ struct TabBarView_Previews: PreviewProvider {
     static var previews: some View {
         TabBarView(
             store: .init(
-                initialState: .init(tab: .colors),
+                initialState: .init(tab: .colors, coordinator: .init(routes: [
+                    .root(.home(.init(settings: .initial, colors: .initial)))
+                ])),
                 reducer: tabBarReducer,
                 environment: ()
             )

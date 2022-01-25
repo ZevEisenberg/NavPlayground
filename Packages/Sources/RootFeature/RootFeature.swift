@@ -11,18 +11,21 @@ extension RootView: AutoTCA {
             case splashPage
             case app
         }
-        var screen: Screen
-        var tabBar: TabBarView.State
+        public var screen: Screen
+        public var tabBar: TabBarView.State
+        
         public init(
             screen: Screen = .splashPage,
-            tabBar: TabBarView.State = .init()
+            tabBar: TabBarView.State = .init(coordinator: .init(routes: [
+                .root(.home(.init(settings: .initial, colors: .initial)))
+            ]))
         ) {
             self.screen = screen
             self.tabBar = tabBar
         }
     }
 
-    public enum Action {
+    public enum Action: Equatable {
         case appear
         case moveFromSplashPageToApp
         case tabBar(TabBarView.Action)
@@ -57,7 +60,6 @@ public let rootReducer: RootView.Reducer = .combine(
         }
     }
 )
-    .debug()
 
 public struct RootView: View {
     let store: Self.Store

@@ -33,6 +33,14 @@ extension BuildItem {
         ]
     )
 
+    static let valueChangeReducer = BuildItem(
+        name: "ValueChangeReducer",
+        dependencies: [
+            .composableArchitecture,
+            .tcaCoordinators,
+        ]
+    )
+
     // Features
 
     static let rootFeature = BuildItem(
@@ -103,6 +111,7 @@ let items: [BuildItem] = [
     .splashPage,
     .coordinatorFeature,
     .autoTCA,
+    .valueChangeReducer,
     .screenFeature,
     .settingsFeature,
     .colorsFeature,
@@ -112,7 +121,12 @@ let items: [BuildItem] = [
 ]
 
 let testTargets: [Target] = [
-    //.testTarget(name: "FooTests", dependencies: ["Foo"]),
+    .testTarget(
+        name: "RootFeatureTests",
+        dependencies: [
+            BuildItem.rootFeature.dependency,
+            .composableArchitecture,
+        ]),
 ]
 
 extension Target.Dependency {

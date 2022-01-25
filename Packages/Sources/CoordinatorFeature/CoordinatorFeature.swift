@@ -7,6 +7,7 @@ import SwiftUI
 import HomeFeature
 import SettingsFeature
 import ColorsFeature
+import CasePaths
 
 extension CoordinatorView: AutoTCA {
     public struct State: Equatable, IndexedRouterState {
@@ -36,6 +37,15 @@ public let coordinatorReducer: CoordinatorView.Reducer = screenReducer
 
             case .routeAction(_, action: .home(.goToColors(let colors))):
                 state.routes.push(.colors(colors))
+
+            case .routeAction(_, action: .settings(.stateChanged(let newState))):
+                for (index, route) in zip(state.routes.indices, state.routes) {
+                    if var homeState = (/ScreenState.home).extract(from: route.screen) {
+                        homeState.settings = newState
+                        state.routes[index].screen = .home(homeState)
+                    }
+                }
+                return .none
 
             default:
                 break
@@ -70,6 +80,22 @@ public struct CoordinatorView: View {
                     then: ColorsView.init(store:)
                 )
             }
+        }
+    }
+}
+
+struct CoordinatorView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            CoordinatorView(
+                store: .init(
+                    initialState: .init(routes: [
+                        .root(.home(.init(settings: .initial, colors: .initial))),
+                    ]),
+                    reducer: coordinatorReducer,
+                    environment: ()
+                )
+            )
         }
     }
 }
