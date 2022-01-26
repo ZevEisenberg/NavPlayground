@@ -90,9 +90,10 @@ extension BuildItem {
     static let colorsFeature = BuildItem(
         name: "ColorsFeature",
         dependencies: [
-            .autoTCA,
+            BuildItem.autoTCA.dependency,
             .composableArchitecture,
-            .overture,
+            BuildItem.overture.dependency,
+            .tcaCoordinators,
         ]
     )
 

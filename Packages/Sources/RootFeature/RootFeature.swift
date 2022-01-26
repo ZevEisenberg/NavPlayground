@@ -17,7 +17,7 @@ extension RootView: AutoTCA {
         public init(
             screen: Screen = .splashPage,
             tabBar: TabBarView.State = .init(coordinator: .init(routes: [
-                .root(.home(.init(settings: .initial, colors: .initial)))
+                .root(.home(.init(settings: .initial, colors: .init())))
             ]))
         ) {
             self.screen = screen

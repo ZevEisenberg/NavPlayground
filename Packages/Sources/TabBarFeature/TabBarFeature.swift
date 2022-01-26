@@ -25,7 +25,7 @@ extension TabBarView: AutoTCA {
                 home.settings = newValue
             }
         }
-        public var colors: ColorsView.State {
+        public var colors: ColorsCoordinatorView.State {
             get {
                 home.colors
             }
@@ -36,7 +36,7 @@ extension TabBarView: AutoTCA {
 
         public init(
             tab: TabBarView.State.Tab = .home,
-            home: HomeView.State = .init(settings: .initial, colors: .initial),
+            home: HomeView.State = .init(settings: .initial, colors: .init()),
             coordinator: CoordinatorView.State
         ) {
             self.tab = tab
@@ -50,7 +50,7 @@ extension TabBarView: AutoTCA {
         case coordinator(CoordinatorView.Action)
         case home(HomeView.Action)
         case settings(SettingsView.Action)
-        case colors(ColorsView.Action)
+        case colors(ColorsCoordinatorView.Action)
     }
 }
 
@@ -79,7 +79,7 @@ public let tabBarReducer = TabBarView.Reducer.combine(
         action: /TabBarView.Action.settings,
         environment: { _ in }
     ),
-    colorsReducer.pullback(
+    colorsCoordinatorReducer.pullback(
         state: \.colors,
         action: /TabBarView.Action.colors,
         environment: { _ in }
@@ -112,7 +112,7 @@ public struct TabBarView: View {
                     }
                     .tag(State.Tab.settings)
                 
-                ColorsView(store: store.scope(state: \.colors, action: Action.colors))
+                ColorsCoordinatorView(store: store.scope(state: \.colors, action: Action.colors))
                     .tabItem {
                         Label("Colors", systemImage: "paintpalette.fill")
                     }
@@ -127,7 +127,7 @@ struct TabBarView_Previews: PreviewProvider {
         TabBarView(
             store: .init(
                 initialState: .init(tab: .colors, coordinator: .init(routes: [
-                    .root(.home(.init(settings: .initial, colors: .initial)))
+                    .root(.home(.init(settings: .initial, colors: .init())))
                 ])),
                 reducer: tabBarReducer,
                 environment: ()

@@ -8,9 +8,9 @@ extension HomeView: AutoTCA {
 
     public struct State: Equatable {
         public var settings: SettingsView.State
-        public var colors: ColorsView.State
+        public var colors: ColorsCoordinatorView.State
 
-        public init(settings: SettingsView.State, colors: ColorsView.State) {
+        public init(settings: SettingsView.State, colors: ColorsCoordinatorView.State) {
             self.settings = settings
             self.colors = colors
         }
@@ -20,7 +20,7 @@ extension HomeView: AutoTCA {
         case goToSettingsTapped
         case goToColorsTapped
         case goToSettings(SettingsView.State)
-        case goToColors(ColorsView.State)
+        case goToColors(ColorsCoordinatorView.State)
     }
 
 }
@@ -64,7 +64,7 @@ public struct HomeView: View {
 
                 Section {
                     HStack {
-                        ForEach(viewStore.colors.allColors, id: \.self) { color in
+                        ForEach(viewStore.colors.colors, id: \.self) { color in
                             color
                         }
                     }
@@ -89,7 +89,7 @@ struct HomeView_Previews: PreviewProvider {
             HomeView(store: .init(
                 initialState: .init(
                     settings: .init(foo: true, bar: false, baz: true),
-                    colors: .initial
+                    colors: .init()
                 ),
                 reducer: homeReducer,
                 environment: ())

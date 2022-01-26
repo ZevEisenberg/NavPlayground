@@ -77,7 +77,7 @@ public struct CoordinatorView: View {
                 CaseLet(
                     state: /ScreenState.colors,
                     action: ScreenAction.colors,
-                    then: ColorsView.init(store:)
+                    then: ColorsCoordinatorView.init(store:)
                 )
             }
         }
@@ -90,7 +90,7 @@ struct CoordinatorView_Previews: PreviewProvider {
             CoordinatorView(
                 store: .init(
                     initialState: .init(routes: [
-                        .root(.home(.init(settings: .initial, colors: .initial))),
+                        .root(.home(.init(settings: .initial, colors: .init()))),
                     ]),
                     reducer: coordinatorReducer,
                     environment: ()

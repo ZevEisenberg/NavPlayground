@@ -9,7 +9,7 @@ final class RootFeatureTests: XCTestCase {
     func testCoordinatorReducer() {
         let store = TestStore(
             initialState: .init(routes: [
-                .root(.home(.init(settings: .initial, colors: .initial)))
+                .root(.home(.init(settings: .initial, colors: .init())))
             ]),
             reducer: coordinatorReducer,
             environment: ()
@@ -23,8 +23,8 @@ final class RootFeatureTests: XCTestCase {
 
     func testTabBarReducer() {
         let store = TestStore(
-            initialState: .init(tab: .home, home: .init(settings: .initial, colors: .initial), coordinator: .init(routes: [
-                .root(.home(.init(settings: .initial, colors: .initial)))
+            initialState: .init(tab: .home, home: .init(settings: .initial, colors: .init()), coordinator: .init(routes: [
+                .root(.home(.init(settings: .initial, colors: .init())))
             ])),
             reducer: tabBarReducer,
             environment: ()
