@@ -148,7 +148,7 @@ let package = Package(
     ],
     products: items.map(\.library),
     dependencies: [
-        .package(name: "swift-composable-architecture", url: "https://github.com/pointfreeco/swift-composable-architecture", from: "0.33.0"),
+        .package(name: "swift-composable-architecture", url: "https://github.com/pointfreeco/swift-composable-architecture", .exact("0.35.0")),
         .package(name: "TCACoordinators", url: "https://github.com/johnpatrickmorgan/TCACoordinators.git", from: "0.1.0"),
         .package(name: "Overture", url: "https://github.com/pointfreeco/swift-overture", .upToNextMajor(from: "0.5.0")),
     ],
