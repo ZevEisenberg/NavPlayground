@@ -36,6 +36,10 @@ extension ColorsCoordinatorView: AutoTCA {
                 self.routes.presentSheet(.picker(.init()))
             }
         }
+
+        public static var initial: Self {
+            .init()
+        }
     }
 
     public enum Action: Equatable, IndexedRouterAction {
