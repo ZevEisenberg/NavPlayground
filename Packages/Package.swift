@@ -49,6 +49,7 @@ extension BuildItem {
             .splashPage,
             .tabBarFeature,
             .autoTCA,
+            .colorsFeature,
         ]
     )
 

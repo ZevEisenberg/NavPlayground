@@ -13,10 +13,30 @@ extension CoordinatorView: AutoTCA {
     public struct State: Equatable, IndexedRouterState {
         public var routes: [Route<ScreenState>]
 
+        public var settings: SettingsView.State
+        public var colorsCoordinator: ColorsCoordinatorView.State
+
+        public var home: HomeView.State {
+            get {
+                .init(
+                    settings: settings,
+                    colors: colorsCoordinator.colors
+                )
+            }
+            set {
+                settings = newValue.settings
+                colorsCoordinator.colors = newValue.colors
+            }
+        }
+
         public init(
-            routes: [Route<ScreenState>]
+            routes: [Route<ScreenState>],
+            settings: SettingsView.State,
+            colorsCoordinator: ColorsCoordinatorView.State
         ) {
             self.routes = routes
+            self.settings = settings
+            self.colorsCoordinator = colorsCoordinator
         }
     }
 
@@ -32,20 +52,20 @@ public let coordinatorReducer: CoordinatorView.Reducer = screenReducer
     .withRouteReducer(
         .init { state, action, environment in
             switch action {
-            case .routeAction(_, .home(.goToSettings(let settings))):
-                state.routes.push(.settings(settings))
+            case .routeAction(_, .home(.goToSettingsTapped)):
+                state.routes.push(.settings(state.settings))
 
-            case .routeAction(_, action: .home(.goToColors(let colors))):
-                state.routes.push(.colors(colors))
+            case .routeAction(_, action: .home(.goToColorsTapped)):
+                state.routes.push(.colorsCoordinator(state.colorsCoordinator))
 
-            case .routeAction(_, action: .settings(.stateChanged(let newState))):
-                for (index, route) in zip(state.routes.indices, state.routes) {
-                    if var homeState = (/ScreenState.home).extract(from: route.screen) {
-                        homeState.settings = newState
-                        state.routes[index].screen = .home(homeState)
-                    }
-                }
-                return .none
+//            case .routeAction(_, action: .settings(.stateChanged(let newState))):
+//                for (index, route) in zip(state.routes.indices, state.routes) {
+//                    if var homeState = (/ScreenState.home).extract(from: route.screen) {
+//                        homeState.settings = newState
+//                        state.routes[index].screen = .home(homeState)
+//                    }
+//                }
+//                return .none
 
             default:
                 break
@@ -53,6 +73,13 @@ public let coordinatorReducer: CoordinatorView.Reducer = screenReducer
             return .none
         }
     )
+    .combined(with: .combine(
+        settingsReducer.pullback(
+            state: \CoordinatorView.State.settings,
+            action: <#T##CasePath<GlobalAction, SettingsView.Action>#>,
+            environment: <#T##(GlobalEnvironment) -> Void#>
+        )
+    ))
 
 public struct CoordinatorView: View {
     let store: Self.Store
@@ -75,8 +102,8 @@ public struct CoordinatorView: View {
                     then: SettingsView.init(store:)
                 )
                 CaseLet(
-                    state: /ScreenState.colors,
-                    action: ScreenAction.colors,
+                    state: /ScreenState.colorsCoordinator,
+                    action: ScreenAction.colorsCoordinator,
                     then: ColorsCoordinatorView.init(store:)
                 )
             }
@@ -89,9 +116,13 @@ struct CoordinatorView_Previews: PreviewProvider {
         NavigationView {
             CoordinatorView(
                 store: .init(
-                    initialState: .init(routes: [
-                        .root(.home(.init(settings: .initial, colors: .init()))),
-                    ]),
+                    initialState: .init(
+                        routes: [
+                            .root(.home(.init(settings: .initial, colors: .init()))),
+                        ],
+                        settings: .initial,
+                        colorsCoordinator: .initial
+                    ),
                     reducer: coordinatorReducer,
                     environment: ()
                 )

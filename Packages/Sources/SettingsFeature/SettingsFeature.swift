@@ -18,20 +18,11 @@ extension SettingsView: AutoTCA {
     }
 
     public enum Action: BindableAction, Equatable {
-        case stateChanged(State)
         case binding(BindingAction<SettingsView.State>)
     }
 }
 
-public let settingsReducer: SettingsView.Reducer = .init { state, action, _ in
-    switch action {
-    case .binding:
-        return .init(value: .stateChanged(state))
-    case .stateChanged:
-        return .none
-    }
-}
-.binding()
+public let settingsReducer: SettingsView.Reducer = .empty.binding()
 
 public struct SettingsView: View {
 

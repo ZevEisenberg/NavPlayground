@@ -16,31 +16,12 @@ extension TabBarView: AutoTCA {
 
         public var tab: Tab
         public var coordinator: CoordinatorView.State
-        public var home: HomeView.State
-        public var settings: SettingsView.State {
-            get {
-                home.settings
-            }
-            set {
-                home.settings = newValue
-            }
-        }
-        public var colors: ColorsCoordinatorView.State {
-            get {
-                home.colors
-            }
-            set {
-                home.colors = newValue
-            }
-        }
 
         public init(
             tab: TabBarView.State.Tab = .home,
-            home: HomeView.State = .init(settings: .initial, colors: .init()),
             coordinator: CoordinatorView.State
         ) {
             self.tab = tab
-            self.home = home
             self.coordinator = coordinator
         }
     }
@@ -50,7 +31,7 @@ extension TabBarView: AutoTCA {
         case coordinator(CoordinatorView.Action)
         case home(HomeView.Action)
         case settings(SettingsView.Action)
-        case colors(ColorsCoordinatorView.Action)
+        case colorsCoordinator(ColorsCoordinatorView.Action)
     }
 }
 
@@ -60,7 +41,7 @@ public let tabBarReducer = TabBarView.Reducer.combine(
         case .selectedTab(let tab):
             state.tab = tab
             return .none
-        case .coordinator, .settings, .colors, .home:
+        case .coordinator, .settings, .colorsCoordinator, .home:
             return .none
         }
     },
@@ -70,18 +51,18 @@ public let tabBarReducer = TabBarView.Reducer.combine(
         environment: { _ in }
     ),
     homeReducer.pullback(
-        state: \.home,
+        state: \.coordinator.home,
         action: /TabBarView.Action.home,
         environment: { _ in }
     ),
     settingsReducer.pullback(
-        state: \.settings,
+        state: \.coordinator.settings,
         action: /TabBarView.Action.settings,
         environment: { _ in }
     ),
     colorsCoordinatorReducer.pullback(
-        state: \.colors,
-        action: /TabBarView.Action.colors,
+        state: \.coordinator.colorsCoordinator,
+        action: /TabBarView.Action.colorsCoordinator,
         environment: { _ in }
     )
 )
@@ -106,13 +87,13 @@ public struct TabBarView: View {
                 }
                 .tag(State.Tab.home)
                 
-                SettingsView(store: store.scope(state: \.settings, action: Action.settings))
+                SettingsView(store: store.scope(state: \.coordinator.settings, action: Action.settings))
                     .tabItem {
                         Label("Settings", systemImage: "gear")
                     }
                     .tag(State.Tab.settings)
                 
-                ColorsCoordinatorView(store: store.scope(state: \.colors, action: Action.colors))
+                ColorsCoordinatorView(store: store.scope(state: \.coordinator.colorsCoordinator, action: Action.colorsCoordinator))
                     .tabItem {
                         Label("Colors", systemImage: "paintpalette.fill")
                     }
@@ -126,9 +107,19 @@ struct TabBarView_Previews: PreviewProvider {
     static var previews: some View {
         TabBarView(
             store: .init(
-                initialState: .init(tab: .colors, coordinator: .init(routes: [
-                    .root(.home(.init(settings: .initial, colors: .init())))
-                ])),
+                initialState: .init(
+                    tab: .colors,
+                    coordinator: .init(
+                        routes: [
+                            .root(.home(.init(
+                                settings: .initial,
+                                colors: .init()))
+                                 )
+                        ],
+                        settings: .initial,
+                        colorsCoordinator: .initial
+                    )
+                ),
                 reducer: tabBarReducer,
                 environment: ()
             )

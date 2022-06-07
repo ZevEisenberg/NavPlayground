@@ -4,6 +4,7 @@ import SwiftUI
 import AutoTCA
 import TabBarFeature
 import SplashPage
+import ColorsFeature
 
 extension RootView: AutoTCA {
     public struct State: Equatable {
@@ -16,9 +17,22 @@ extension RootView: AutoTCA {
         
         public init(
             screen: Screen = .splashPage,
-            tabBar: TabBarView.State = .init(coordinator: .init(routes: [
-                .root(.home(.init(settings: .initial, colors: .init())))
-            ]))
+            tabBar: TabBarView.State = .init(
+                coordinator: .init(
+                    routes: [
+                        .root(
+                            .home(
+                                .init(
+                                    settings: .initial,
+                                    colors: ColorsCoordinatorView.State.initial.colors
+                                )
+                            )
+                        )
+                    ],
+                    settings: .initial,
+                    colorsCoordinator: .initial
+                )
+            )
         ) {
             self.screen = screen
             self.tabBar = tabBar
@@ -60,6 +74,10 @@ public let rootReducer: RootView.Reducer = .combine(
         }
     }
 )
+    .combined(with: .init { state, action, environment in
+        print("action: \(action)\nstate: \(state)\n\n")
+        return .none
+    })
 
 public struct RootView: View {
     let store: Self.Store

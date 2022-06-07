@@ -8,9 +8,9 @@ extension HomeView: AutoTCA {
 
     public struct State: Equatable {
         public var settings: SettingsView.State
-        public var colors: ColorsCoordinatorView.State
+        public var colors: [Color]
 
-        public init(settings: SettingsView.State, colors: ColorsCoordinatorView.State) {
+        public init(settings: SettingsView.State, colors: [Color]) {
             self.settings = settings
             self.colors = colors
         }
@@ -19,24 +19,11 @@ extension HomeView: AutoTCA {
     public enum Action: Equatable {
         case goToSettingsTapped
         case goToColorsTapped
-        case goToSettings(SettingsView.State)
-        case goToColors(ColorsCoordinatorView.State)
     }
 
 }
 
-public let homeReducer = HomeView.Reducer { state, action, _ in
-    switch action {
-    case .goToSettingsTapped:
-        return .init(value: .goToSettings(state.settings))
-
-    case .goToColorsTapped:
-        return .init(value: .goToColors(state.colors))
-
-    case .goToSettings, .goToColors:
-        return .none
-    }
-}
+public let homeReducer = HomeView.Reducer.empty
 
 public struct HomeView: View {
     let store: Self.Store
@@ -64,7 +51,7 @@ public struct HomeView: View {
 
                 Section {
                     HStack {
-                        ForEach(viewStore.colors.colors, id: \.self) { color in
+                        ForEach(viewStore.colors, id: \.self) { color in
                             color
                         }
                     }
