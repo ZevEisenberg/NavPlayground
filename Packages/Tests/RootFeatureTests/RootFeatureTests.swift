@@ -1,8 +1,8 @@
 import ComposableArchitecture
 import RootFeature
 import XCTest
-import CoordinatorFeature
-import TabBarFeature
+
+import AppFeature
 
 final class RootFeatureTests: XCTestCase {
 

@@ -4,40 +4,11 @@ import PackageDescription
 
 extension BuildItem {
     // Infrastructure
-    static let screenFeature = BuildItem(
-        name: "ScreenFeature",
-        dependencies: [
-            .composableArchitecture,
-            .homeFeature,
-            .settingsFeature,
-            .colorsFeature,
-        ])
-
-    static let coordinatorFeature = BuildItem(
-        name: "CoordinatorFeature",
-        dependencies: [
-            BuildItem.autoTCA.dependency,
-            .composableArchitecture,
-            .tcaCoordinators,
-            BuildItem.screenFeature.dependency,
-            BuildItem.homeFeature.dependency,
-            BuildItem.settingsFeature.dependency,
-            BuildItem.colorsFeature.dependency,
-        ]
-    )
 
     static let autoTCA = BuildItem(
         name: "AutoTCA",
         dependencies: [
             .composableArchitecture,
-        ]
-    )
-
-    static let valueChangeReducer = BuildItem(
-        name: "ValueChangeReducer",
-        dependencies: [
-            .composableArchitecture,
-            .tcaCoordinators,
         ]
     )
 
@@ -47,7 +18,7 @@ extension BuildItem {
         name: "RootFeature",
         dependencies: [
             .splashPage,
-            .tabBarFeature,
+            .appFeature,
             .autoTCA,
         ]
     )
@@ -58,14 +29,14 @@ extension BuildItem {
             .copy("waterdrop.mp4"),
         ])
 
-    static let tabBarFeature = BuildItem(
-        name: "TabBarFeature",
+    static let appFeature = BuildItem(
+        name: "AppFeature",
         dependencies: [
             .autoTCA,
             .composableArchitecture,
-            .coordinatorFeature,
             .settingsFeature,
-            .colorsFeature,
+            .homeFeature,
+//            .colorsFeature,
         ]
     )
 
@@ -75,7 +46,7 @@ extension BuildItem {
             .autoTCA,
             .composableArchitecture,
             .settingsFeature,
-            .colorsFeature,
+//            .colorsFeature,
         ]
     )
 
@@ -93,7 +64,6 @@ extension BuildItem {
             BuildItem.autoTCA.dependency,
             .composableArchitecture,
             BuildItem.overture.dependency,
-            .tcaCoordinators,
         ]
     )
 
@@ -110,14 +80,11 @@ extension BuildItem {
 
 let items: [BuildItem] = [
     .splashPage,
-    .coordinatorFeature,
     .autoTCA,
-    .valueChangeReducer,
-    .screenFeature,
     .settingsFeature,
     .colorsFeature,
     .homeFeature,
-    .tabBarFeature,
+    .appFeature,
     .rootFeature,
 ]
 
@@ -134,10 +101,6 @@ extension Target.Dependency {
     static var composableArchitecture: Self {
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture")
     }
-
-    static var tcaCoordinators: Self {
-        "TCACoordinators"
-    }
 }
 
 let package = Package(
@@ -149,7 +112,6 @@ let package = Package(
     products: items.map(\.library),
     dependencies: [
         .package(name: "swift-composable-architecture", url: "https://github.com/pointfreeco/swift-composable-architecture", .exact("0.35.0")),
-        .package(name: "TCACoordinators", url: "https://github.com/johnpatrickmorgan/TCACoordinators.git", from: "0.1.0"),
         .package(name: "Overture", url: "https://github.com/pointfreeco/swift-overture", .upToNextMajor(from: "0.5.0")),
     ],
     targets: items.map(\.target) + testTargets

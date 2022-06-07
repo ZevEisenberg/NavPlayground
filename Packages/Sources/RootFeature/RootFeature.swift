@@ -2,7 +2,7 @@ import ComposableArchitecture
 import Combine
 import SwiftUI
 import AutoTCA
-import TabBarFeature
+import AppFeature
 import SplashPage
 
 extension RootView: AutoTCA {
@@ -12,23 +12,21 @@ extension RootView: AutoTCA {
             case app
         }
         public var screen: Screen
-        public var tabBar: TabBarView.State
+        public var app: AppView.State
         
         public init(
             screen: Screen = .splashPage,
-            tabBar: TabBarView.State = .init(coordinator: .init(routes: [
-                .root(.home(.init(settings: .initial, colors: .init())))
-            ]))
+            app: AppView.State = .init(tab: .home, settings: .initial)
         ) {
             self.screen = screen
-            self.tabBar = tabBar
+            self.app = app
         }
     }
 
     public enum Action: Equatable {
         case appear
         case moveFromSplashPageToApp
-        case tabBar(TabBarView.Action)
+        case app(AppView.Action)
     }
 
     public struct Environment {
@@ -40,9 +38,9 @@ extension RootView: AutoTCA {
 }
 
 public let rootReducer: RootView.Reducer = .combine(
-    tabBarReducer.pullback(
-        state: \.tabBar,
-        action: /RootView.Action.tabBar,
+    appReducer.pullback(
+        state: \.app,
+        action: /RootView.Action.app,
         environment: { _ in }
     ),
     .init { state, action, environment in
@@ -55,11 +53,12 @@ public let rootReducer: RootView.Reducer = .combine(
         case .moveFromSplashPageToApp:
             state.screen = .app
             return .none
-        case .tabBar:
+        case .app:
             return .none
         }
     }
 )
+    .debug()
 
 public struct RootView: View {
     let store: Self.Store
@@ -75,7 +74,7 @@ public struct RootView: View {
                 case .splashPage:
                     SplashPageView()
                 case .app:
-                    TabBarView(store: store.scope(state: \.tabBar, action: Action.tabBar))
+                    AppView(store: store.scope(state: \.app, action: Action.app))
                 }
             }
             .onAppear {
