@@ -154,8 +154,6 @@ public struct AppView: View {
             }
             .sheet(isPresented: viewStore.binding(\.$isColorsPresented)) {
                 ColorsView(store: store.scope(state: \.colors, action: Action.colors))
-                    .foregroundColor(.black)
-                    .background(Color.white)
             }
         }
     }

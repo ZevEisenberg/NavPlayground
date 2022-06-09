@@ -25,7 +25,10 @@ extension ColorsView: AutoTCA {
             [color0, color1, color2, color3]
         }
 
-        var selectedColor: Color? = nil
+        var selectedColor: WhichColor? = nil
+
+        @BindableState
+        var isColorSelected: Bool = false
 
         public init(
             color0: Color,
@@ -52,17 +55,9 @@ extension ColorsView: AutoTCA {
 
 public let colorsReducer = ColorsView.Reducer.init() { state, action, _ in
     switch action {
-    case let .tappedItem(color):
-        switch color {
-        case .color0:
-            state.selectedColor = state.color0
-        case .color1:
-            state.selectedColor = state.color0
-        case .color2:
-            state.selectedColor = state.color0
-        case .color3:
-            state.selectedColor = state.color0
-        }
+    case let .tappedItem(whichColor):
+        state.selectedColor = whichColor
+        state.isColorSelected = true
         return .none
 //    case .colorPicker:
 //        return .none
@@ -77,40 +72,47 @@ public struct ColorsView: View {
         self.store = store
     }
 
+    @ViewBuilder
+    func colorsView(_ viewStore: Self.ViewStore) -> some View {
+        VStack {
+            Button {
+                viewStore.send(.tappedItem(.color0))
+            } label: {
+                viewStore.color0
+            }
+
+            Button {
+                viewStore.send(.tappedItem(.color1))
+            } label: {
+                viewStore.color1
+            }
+            Button {
+                viewStore.send(.tappedItem(.color2))
+            } label: {
+                viewStore.color2
+            }
+
+            Button {
+                viewStore.send(.tappedItem(.color3))
+            } label: {
+                viewStore.color3
+            }
+        }
+        .frame(width: 100, height: 300)
+    }
+
+
     public var body: some View {
         WithViewStore(store) { viewStore in
-//            if let selectedColor = viewStore.selectedColor {
-//                ColorPickerView(store: store.scope(state: .empty, action: Action.colorPicker))
-//            } else {
-                VStack {
-                    HStack {
-                        Button {
-                            viewStore.send(.tappedItem(.color0))
-                        } label: {
-                            viewStore.color0
-                        }
-
-                        Button {
-                            viewStore.send(.tappedItem(.color1))
-                        } label: {
-                            viewStore.color1
-                        }
-                    }
-                    HStack {
-                        Button {
-                            viewStore.send(.tappedItem(.color2))
-                        } label: {
-                            viewStore.color2
-                        }
-
-                        Button {
-                            viewStore.send(.tappedItem(.color3))
-                        } label: {
-                            viewStore.color3
-                        }
-                    }
+            colorsView(viewStore)
+                .sheet(isPresented: viewStore.binding(\.$isColorSelected) {
+                    ColorPickerView(
+                        store: store.scope(
+                            state: .empty,
+                            action: { pickedColor in .picked(pickedColor) }
+                        )
+                    )
                 }
-//            }
         }
         .navigationTitle("Colors")
     }
