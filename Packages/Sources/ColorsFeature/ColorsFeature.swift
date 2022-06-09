@@ -2,6 +2,17 @@ import ComposableArchitecture
 import SwiftUI
 import AutoTCA
 
+public enum WhichColor: Int, Identifiable {
+    case color0
+    case color1
+    case color2
+    case color3
+
+    public var id: Int {
+        rawValue
+    }
+}
+
 extension ColorsView: AutoTCA {
     public struct State: Equatable {
         public var color0: Color
@@ -13,6 +24,8 @@ extension ColorsView: AutoTCA {
         public var allColors: [Color] {
             [color0, color1, color2, color3]
         }
+
+        var selectedColor: Color? = nil
 
         public init(
             color0: Color,
@@ -33,10 +46,28 @@ extension ColorsView: AutoTCA {
 
     public enum Action: Equatable {
         case tappedItem(WhichColor)
+//        case colorPicker(ColorPickerView.Action)
     }
 }
 
-public let colorsReducer = ColorsView.Reducer.empty // handled by coordinator
+public let colorsReducer = ColorsView.Reducer.init() { state, action, _ in
+    switch action {
+    case let .tappedItem(color):
+        switch color {
+        case .color0:
+            state.selectedColor = state.color0
+        case .color1:
+            state.selectedColor = state.color0
+        case .color2:
+            state.selectedColor = state.color0
+        case .color3:
+            state.selectedColor = state.color0
+        }
+        return .none
+//    case .colorPicker:
+//        return .none
+    }
+}
 
 public struct ColorsView: View {
 
@@ -48,34 +79,38 @@ public struct ColorsView: View {
 
     public var body: some View {
         WithViewStore(store) { viewStore in
-            VStack {
-                HStack {
-                    Button {
-                        viewStore.send(.tappedItem(.color0))
-                    } label: {
-                        viewStore.color0
-                    }
+//            if let selectedColor = viewStore.selectedColor {
+//                ColorPickerView(store: store.scope(state: .empty, action: Action.colorPicker))
+//            } else {
+                VStack {
+                    HStack {
+                        Button {
+                            viewStore.send(.tappedItem(.color0))
+                        } label: {
+                            viewStore.color0
+                        }
 
-                    Button {
-                        viewStore.send(.tappedItem(.color1))
-                    } label: {
-                        viewStore.color1
+                        Button {
+                            viewStore.send(.tappedItem(.color1))
+                        } label: {
+                            viewStore.color1
+                        }
+                    }
+                    HStack {
+                        Button {
+                            viewStore.send(.tappedItem(.color2))
+                        } label: {
+                            viewStore.color2
+                        }
+
+                        Button {
+                            viewStore.send(.tappedItem(.color3))
+                        } label: {
+                            viewStore.color3
+                        }
                     }
                 }
-                HStack {
-                    Button {
-                        viewStore.send(.tappedItem(.color2))
-                    } label: {
-                        viewStore.color2
-                    }
-
-                    Button {
-                        viewStore.send(.tappedItem(.color3))
-                    } label: {
-                        viewStore.color3
-                    }
-                }
-            }
+//            }
         }
         .navigationTitle("Colors")
     }

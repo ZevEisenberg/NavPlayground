@@ -3,25 +3,26 @@ import SwiftUI
 import AutoTCA
 //import ColorsFeature
 import SettingsFeature
+import ColorsFeature
 
 extension HomeView: AutoTCA {
 
     public struct State: Equatable {
         public var settings: SettingsView.State
-//        public var colors: ColorsCoordinatorView.State
+        public var colors: ColorsView.State
 
         public init(
-            settings: SettingsView.State
-//            colors: ColorsCoordinatorView.State
+            settings: SettingsView.State,
+            colors: ColorsView.State
         ) {
             self.settings = settings
-//            self.colors = colors
+            self.colors = colors
         }
     }
 
     public enum Action: Equatable {
         case goToSettingsTapped
-//        case goToColorsTapped
+        case goToColorsTapped
 //        case goToSettings(SettingsView.State)
 //        case goToColors(ColorsCoordinatorView.State)
     }
@@ -47,10 +48,17 @@ public struct HomeView: View {
                 } header: {
                     Text("Settings")
                 } footer: {
-                    Button {
-                        viewStore.send(.goToSettingsTapped)
-                    } label: {
-                        Text("Edit \(Image(systemName: "chevron.forward"))")
+                    HStack {
+                        Button {
+                            viewStore.send(.goToSettingsTapped)
+                        } label: {
+                            Text("Edit \(Image(systemName: "chevron.forward"))")
+                        }
+                        Button {
+                            viewStore.send(.goToColorsTapped)
+                        } label: {
+                            Text("Colors \(Image(systemName: "chevron.forward"))")
+                        }
                     }
                 }
 
@@ -80,8 +88,8 @@ struct HomeView_Previews: PreviewProvider {
         NavigationView {
             HomeView(store: .init(
                 initialState: .init(
-                    settings: .init(foo: true, bar: false, baz: true)
-//                    colors: .init()
+                    settings: .init(foo: true, bar: false, baz: true),
+                    colors: .initial
                 ),
                 reducer: homeReducer,
                 environment: ())

@@ -4,6 +4,7 @@ import AutoTCA
 import SettingsFeature
 //import ColorsFeature
 import HomeFeature
+import ColorsFeature
 
 extension AppView: AutoTCA {
     public struct State: Equatable {
@@ -17,17 +18,17 @@ extension AppView: AutoTCA {
         public var home: HomeView.State {
             get {
                 .init(
-                    settings: settings
-                    /* todo: colors */
+                    settings: settings,
+                    colors: colors
                 )
             }
             set {
                 settings = newValue.settings
-                // todo: colors
+                colors = newValue.colors
             }
         }
         public var settings: SettingsView.State
-//        public var colors: ColorsCoordinatorView.State
+        public var colors: ColorsView.State
 
         @BindableState
         var isSettingsPresented: Bool
@@ -35,17 +36,23 @@ extension AppView: AutoTCA {
         @BindableState
         var isHelloWorldPresented: Bool
 
+        @BindableState
+        var isColorsPresented: Bool
+
         public init(
             tab: AppView.State.Tab = .home,
             settings: SettingsView.State,
-            // todo: colors
+            colors: ColorsView.State,
             isSettingsPresented: Bool = false,
-            isHelloWorldPresented: Bool = false
+            isHelloWorldPresented: Bool = false,
+            isColorsPresented: Bool = false
         ) {
             self.tab = tab
             self.settings = settings
+            self.colors = colors
             self.isSettingsPresented = isSettingsPresented
             self.isHelloWorldPresented = isHelloWorldPresented
+            self.isColorsPresented = isColorsPresented
         }
     }
 
@@ -53,7 +60,7 @@ extension AppView: AutoTCA {
         case selectedTab(State.Tab)
         case home(HomeView.Action)
         case settings(SettingsView.Action)
-//        case colors(ColorsCoordinatorView.Action)
+        case colors(ColorsView.Action)
 
         case binding(_ action: BindingAction<State>)
     }
@@ -68,10 +75,19 @@ public let appReducer = AppView.Reducer.combine(
         case .home(.goToSettingsTapped):
             state.isSettingsPresented = true
             return .none
+        case .home(.goToColorsTapped):
+            state.isColorsPresented = true
+            return .none
         case .settings(.sayHelloTapped):
             state.isHelloWorldPresented = true
             return .none
+        case .settings(.gotoColorsTapped):
+            state.isColorsPresented = true
+            return .none
         case .settings:
+            return .none
+        case let .colors(.tappedItem(color)):
+            print(color)
             return .none
         case .binding:
             return .none
@@ -86,12 +102,12 @@ public let appReducer = AppView.Reducer.combine(
         state: \.settings,
         action: /AppView.Action.settings,
         environment: { _ in }
+    ),
+    colorsReducer.pullback(
+        state: \.colors,
+        action: /AppView.Action.colors,
+        environment: { _ in }
     )
-//    colorsCoordinatorReducer.pullback(
-//        state: \.colors,
-//        action: /TabBarView.Action.colors,
-//        environment: { _ in }
-//    )
 )
     .binding()
 
@@ -136,6 +152,11 @@ public struct AppView: View {
 //                    }
 //                    .tag(State.Tab.colors)
             }
+            .sheet(isPresented: viewStore.binding(\.$isColorsPresented)) {
+                ColorsView(store: store.scope(state: \.colors, action: Action.colors))
+                    .foregroundColor(.black)
+                    .background(Color.white)
+            }
         }
     }
 
@@ -155,7 +176,11 @@ struct TabBarView_Previews: PreviewProvider {
     static var previews: some View {
         AppView(
             store: .init(
-                initialState: .init(tab: .home, settings: .initial),
+                initialState: .init(
+                    tab: .home,
+                    settings: .initial,
+                    colors: .initial
+                ),
                 reducer: appReducer,
                 environment: ()
             )

@@ -36,7 +36,7 @@ extension BuildItem {
             .composableArchitecture,
             .settingsFeature,
             .homeFeature,
-//            .colorsFeature,
+            .colorsFeature,
         ]
     )
 
@@ -46,7 +46,7 @@ extension BuildItem {
             .autoTCA,
             .composableArchitecture,
             .settingsFeature,
-//            .colorsFeature,
+            .colorsFeature,
         ]
     )
 

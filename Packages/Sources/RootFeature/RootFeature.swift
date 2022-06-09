@@ -16,7 +16,11 @@ extension RootView: AutoTCA {
         
         public init(
             screen: Screen = .splashPage,
-            app: AppView.State = .init(tab: .home, settings: .initial)
+            app: AppView.State = .init(
+                tab: .home,
+                settings: .initial,
+                colors: .initial
+            )
         ) {
             self.screen = screen
             self.app = app
