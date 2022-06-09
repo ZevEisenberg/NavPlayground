@@ -32,15 +32,20 @@ extension AppView: AutoTCA {
         @BindableState
         var isSettingsPresented: Bool
 
+        @BindableState
+        var isHelloWorldPresented: Bool
+
         public init(
             tab: AppView.State.Tab = .home,
             settings: SettingsView.State,
             // todo: colors
-            isSettingsPresented: Bool = false
+            isSettingsPresented: Bool = false,
+            isHelloWorldPresented: Bool = false
         ) {
             self.tab = tab
             self.settings = settings
-            self.isSettingsPresented = false
+            self.isSettingsPresented = isSettingsPresented
+            self.isHelloWorldPresented = isHelloWorldPresented
         }
     }
 
@@ -63,7 +68,10 @@ public let appReducer = AppView.Reducer.combine(
         case .home(.goToSettingsTapped):
             state.isSettingsPresented = true
             return .none
-        case .settings /*.colors,*/:
+        case .settings(.sayHelloTapped):
+            state.isHelloWorldPresented = true
+            return .none
+        case .settings:
             return .none
         case .binding:
             return .none
@@ -103,21 +111,24 @@ public struct AppView: View {
                     HomeView(store: store.scope(state: \.home, action: Action.home))
                         .overlay {
                             NavigationLink(isActive: viewStore.binding(\.$isSettingsPresented), destination: {
-                                settingsView
+                                settingsView(viewStore: viewStore)
                             }, label: EmptyView.init)
-                            .opacity(0)
+                            .hidden()
                         }
+
                 }
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
                 .tag(State.Tab.home)
-                
-                settingsView
-                    .tabItem {
-                        Label("Settings", systemImage: "gear")
-                    }
-                    .tag(State.Tab.settings)
+
+                NavigationView {
+                    settingsView(viewStore: viewStore)
+                }
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
+                }
+                .tag(State.Tab.settings)
                 
 //                ColorsCoordinatorView(store: store.scope(state: \.colors, action: Action.colors))
 //                    .tabItem {
@@ -129,8 +140,14 @@ public struct AppView: View {
     }
 
     @ViewBuilder
-    private var settingsView: some View {
+    private func settingsView(viewStore: Self.ViewStore) -> some View {
         SettingsView(store: store.scope(state: \.settings, action: Action.settings))
+            .overlay {
+                NavigationLink(isActive: viewStore.binding(\.$isHelloWorldPresented), destination: {
+                    HelloWorldView()
+                }, label: EmptyView.init)
+                .hidden()
+            }
     }
 }
 
@@ -143,5 +160,11 @@ struct TabBarView_Previews: PreviewProvider {
                 environment: ()
             )
         )
+    }
+}
+
+struct HelloWorldView: View {
+    var body: some View {
+        Text("Hello, World!")
     }
 }

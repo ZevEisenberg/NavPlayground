@@ -18,6 +18,7 @@ extension SettingsView: AutoTCA {
     }
 
     public enum Action: BindableAction, Equatable {
+        case sayHelloTapped
         case binding(BindingAction<SettingsView.State>)
     }
 }
@@ -35,9 +36,16 @@ public struct SettingsView: View {
     public var body: some View {
         WithViewStore(store) { viewStore in
             Form {
-                Toggle("Foo", isOn: viewStore.binding(\.$foo))
-                Toggle("Bar", isOn: viewStore.binding(\.$bar))
-                Toggle("Baz", isOn: viewStore.binding(\.$baz))
+                Section {
+                    Toggle("Foo", isOn: viewStore.binding(\.$foo))
+                    Toggle("Bar", isOn: viewStore.binding(\.$bar))
+                    Toggle("Baz", isOn: viewStore.binding(\.$baz))
+                }
+                Section {
+                    Button(action: { viewStore.send(.sayHelloTapped) }, label: {
+                        Text("Say Hello, World")
+                    })
+                }
             }
             .navigationTitle("Settings")
         }

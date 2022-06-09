@@ -90,9 +90,9 @@ let items: [BuildItem] = [
 
 let testTargets: [Target] = [
     .testTarget(
-        name: "RootFeatureTests",
+        name: "AppFeatureTests",
         dependencies: [
-            BuildItem.rootFeature.dependency,
+            BuildItem.appFeature.dependency,
             .composableArchitecture,
         ]),
 ]

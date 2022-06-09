@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "RootFeatureTests"
-               BuildableName = "RootFeatureTests"
-               BlueprintName = "RootFeatureTests"
+               BlueprintIdentifier = "AppFeatureTests"
+               BuildableName = "AppFeatureTests"
+               BlueprintName = "AppFeatureTests"
                ReferencedContainer = "container:Packages">
             </BuildableReference>
          </TestableReference>
