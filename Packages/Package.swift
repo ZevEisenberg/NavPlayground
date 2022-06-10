@@ -64,6 +64,7 @@ extension BuildItem {
             BuildItem.autoTCA.dependency,
             .composableArchitecture,
             BuildItem.overture.dependency,
+            BuildItem.swiftUINavigation.dependency,
         ]
     )
 
@@ -75,6 +76,10 @@ extension BuildItem {
 
     static var overture: BuildItem {
         .init(name: "Overture", dependency: .product(name: "Overture", package: "overture"))
+    }
+
+    static var swiftUINavigation: BuildItem {
+        .init(name: "SwiftUINavigation", dependency: .product(name: "SwiftUINavigation", package: "swiftui-navigation"))
     }
 }
 
@@ -113,6 +118,7 @@ let package = Package(
     dependencies: [
         .package(name: "swift-composable-architecture", url: "https://github.com/pointfreeco/swift-composable-architecture", .exact("0.35.0")),
         .package(name: "Overture", url: "https://github.com/pointfreeco/swift-overture", .upToNextMajor(from: "0.5.0")),
+        .package(name: "swiftui-navigation", url: "https://github.com/pointfreeco/swiftui-navigation", .exact("0.1.0")),
     ],
     targets: items.map(\.target) + testTargets
 )

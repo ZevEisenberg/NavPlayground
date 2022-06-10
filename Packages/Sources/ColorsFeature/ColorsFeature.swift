@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 import AutoTCA
+import SwiftUINavigation
 
 public enum ColorIndex: Int, Identifiable {
     case color0
@@ -16,6 +17,8 @@ public enum ColorIndex: Int, Identifiable {
 extension ColorsFeatureView: AutoTCA {
     public struct State: Equatable {
         public var list: ColorsListView.State
+
+        @BindableState
         public var picker: ColorPickerView.State?
 
         public init(
@@ -31,9 +34,11 @@ extension ColorsFeatureView: AutoTCA {
         }
     }
 
-    public enum Action: Equatable {
+    public enum Action: Equatable, BindableAction {
         case list(ColorsListView.Action)
         case picker(ColorPickerView.Action)
+
+        case binding(_ action: BindingAction<State>)
     }
 }
 
@@ -63,8 +68,12 @@ public let colorsFeatureReducer = ColorsFeatureView.Reducer { state, action, _ i
             state.list.color3 = color
         }
         return .none
+
+    case .binding:
+        return .none
     }
 }
+    .binding()
 
 public struct ColorsFeatureView: View {
 
@@ -77,18 +86,23 @@ public struct ColorsFeatureView: View {
     public var body: some View {
         WithViewStore(store) { viewStore in
             ColorsListView(store: store.scope(state: \.list, action: Action.list))
-                .sheet(isPresented: Binding(
-                    get: { viewStore.picker != nil },
-                    set: { newValue in
-                        if !newValue {
-                            viewStore.send(.picker(.dismiss))
-                        }
-                    }
-                )) {
-                    IfLetStore(store.scope(state: \.picker, action: Action.picker)) { store in
-                        NavigationView {
-                            ColorPickerView(store: store)
-                        }
+//                .sheet(
+//                    unwrapping: viewStore.binding(\.$picker),
+//                    content: { _ in
+//                        IfLetStore(store.scope(state: \.picker, action: Action.picker)) { store in
+//                            NavigationView {
+//                                ColorPickerView(store: store)
+//                            }
+//                        }
+//                    }
+//                )
+
+                .sheet(
+                    unwrapping: viewStore.binding(\.$picker),
+                    store: store.scope(state: \.picker, action: Action.picker)
+                ) { store in
+                    NavigationView {
+                        ColorPickerView(store: store)
                     }
                 }
         }

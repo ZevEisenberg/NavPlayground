@@ -106,22 +106,23 @@ public let appReducer = AppView.Reducer.combine(
         action: /AppView.Action.colors,
         environment: { _ in }
     )
-).combined(with: .init { state, action, environment in
-    // analytics reducer
-    switch action {
-    case let .selectedTab(selectedTabAction):
-        print("selectedTab action: \(selectedTabAction)")
-    case let .home(homeAction):
-        print("home action: \(homeAction)")
-    case let .settings(settingsAction):
-        print("settings action: \(settingsAction)")
-    case let .colors(colorsAction):
-        print("colors action: \(colorsAction)")
-    case let .binding(bindingAction):
-        print("binding action: \(bindingAction)")
-    }
-    return .none
-})
+)
+//    .combined(with: .init { state, action, environment in
+//    // analytics reducer
+//    switch action {
+//    case let .selectedTab(selectedTabAction):
+//        print("selectedTab action: \(selectedTabAction)")
+//    case let .home(homeAction):
+//        print("home action: \(homeAction)")
+//    case let .settings(settingsAction):
+//        print("settings action: \(settingsAction)")
+//    case let .colors(colorsAction):
+//        print("colors action: \(colorsAction)")
+//    case let .binding(bindingAction):
+//        print("binding action: \(bindingAction)")
+//    }
+//    return .none
+//})
 
 public struct AppView: View {
     let store: Self.Store
