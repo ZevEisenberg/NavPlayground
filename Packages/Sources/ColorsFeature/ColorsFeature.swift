@@ -2,7 +2,7 @@ import ComposableArchitecture
 import SwiftUI
 import AutoTCA
 
-public enum WhichColor: Int, Identifiable {
+public enum ColorIndex: Int, Identifiable {
     case color0
     case color1
     case color2
@@ -13,58 +13,60 @@ public enum WhichColor: Int, Identifiable {
     }
 }
 
-extension ColorsView: AutoTCA {
+extension ColorsFeatureView: AutoTCA {
     public struct State: Equatable {
-        public var color0: Color
-        public var color1: Color
-        public var color2: Color
-        public var color3: Color
-
-
-        public var allColors: [Color] {
-            [color0, color1, color2, color3]
-        }
-
-        var selectedColor: WhichColor? = nil
-
-        @BindableState
-        var isColorSelected: Bool = false
+        public var list: ColorsListView.State
+        public var picker: ColorPickerView.State?
 
         public init(
-            color0: Color,
-            color1: Color,
-            color2: Color,
-            color3: Color
+            root: ColorsListView.State,
+            picker: ColorPickerView.State? = nil
         ) {
-            self.color0 = color0
-            self.color1 = color1
-            self.color2 = color2
-            self.color3 = color3
+            self.list = root
+            self.picker = picker
         }
 
         public static var initial: Self {
-            .init(color0: .red, color1: .green, color2: .blue, color3: .orange)
+            .init(root: .init(color0: .red, color1: .green, color2: .blue, color3: .orange))
         }
     }
 
     public enum Action: Equatable {
-        case tappedItem(WhichColor)
-//        case colorPicker(ColorPickerView.Action)
+        case list(ColorsListView.Action)
+        case picker(ColorPickerView.Action)
     }
 }
 
-public let colorsReducer = ColorsView.Reducer.init() { state, action, _ in
+public let colorsFeatureReducer = ColorsFeatureView.Reducer { state, action, _ in
     switch action {
-    case let .tappedItem(whichColor):
-        state.selectedColor = whichColor
-        state.isColorSelected = true
+    case let .list(.tappedItem(item)):
+        state.picker = .init(colorIndex: item)
         return .none
-//    case .colorPicker:
-//        return .none
+
+    case .picker(.dismiss):
+        state.picker = nil
+        return .none
+
+    case let .picker(.picked(color)):
+        defer { state.picker = nil }
+        guard let colorIndex = state.picker?.colorIndex else {
+            return .none
+        }
+        switch colorIndex {
+        case .color0:
+            state.list.color0 = color
+        case .color1:
+            state.list.color1 = color
+        case .color2:
+            state.list.color2 = color
+        case .color3:
+            state.list.color3 = color
+        }
+        return .none
     }
 }
 
-public struct ColorsView: View {
+public struct ColorsFeatureView: View {
 
     let store: Self.Store
 
@@ -72,46 +74,22 @@ public struct ColorsView: View {
         self.store = store
     }
 
-    @ViewBuilder
-    func colorsView(_ viewStore: Self.ViewStore) -> some View {
-        VStack {
-            Button {
-                viewStore.send(.tappedItem(.color0))
-            } label: {
-                viewStore.color0
-            }
-
-            Button {
-                viewStore.send(.tappedItem(.color1))
-            } label: {
-                viewStore.color1
-            }
-            Button {
-                viewStore.send(.tappedItem(.color2))
-            } label: {
-                viewStore.color2
-            }
-
-            Button {
-                viewStore.send(.tappedItem(.color3))
-            } label: {
-                viewStore.color3
-            }
-        }
-        .frame(width: 100, height: 300)
-    }
-
-
     public var body: some View {
         WithViewStore(store) { viewStore in
-            colorsView(viewStore)
-                .sheet(isPresented: viewStore.binding(\.$isColorSelected) {
-                    ColorPickerView(
-                        store: store.scope(
-                            state: .empty,
-                            action: { pickedColor in .picked(pickedColor) }
-                        )
-                    )
+            ColorsListView(store: store.scope(state: \.list, action: Action.list))
+                .sheet(isPresented: Binding(
+                    get: { viewStore.picker != nil },
+                    set: { newValue in
+                        if !newValue {
+                            viewStore.send(.picker(.dismiss))
+                        }
+                    }
+                )) {
+                    IfLetStore(store.scope(state: \.picker, action: Action.picker)) { store in
+                        NavigationView {
+                            ColorPickerView(store: store)
+                        }
+                    }
                 }
         }
         .navigationTitle("Colors")
@@ -121,9 +99,9 @@ public struct ColorsView: View {
 struct ColorsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ColorsView(store: .init(
+            ColorsFeatureView(store: .init(
                 initialState: .initial,
-                reducer: colorsReducer,
+                reducer: colorsFeatureReducer,
                 environment: ())
             )
         }

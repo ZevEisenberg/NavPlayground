@@ -62,7 +62,6 @@ public let rootReducer: RootView.Reducer = .combine(
         }
     }
 )
-    .debug()
 
 public struct RootView: View {
     let store: Self.Store

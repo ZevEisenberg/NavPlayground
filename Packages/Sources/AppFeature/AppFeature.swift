@@ -2,7 +2,6 @@ import ComposableArchitecture
 import SwiftUI
 import AutoTCA
 import SettingsFeature
-//import ColorsFeature
 import HomeFeature
 import ColorsFeature
 
@@ -11,7 +10,7 @@ extension AppView: AutoTCA {
         public enum Tab: Equatable {
             case home
             case settings
-//            case colors
+            case colors
         }
 
         public var tab: Tab
@@ -19,16 +18,16 @@ extension AppView: AutoTCA {
             get {
                 .init(
                     settings: settings,
-                    colors: colors
+                    colors: colors.list.allColors
                 )
             }
             set {
                 settings = newValue.settings
-                colors = newValue.colors
+                colors.list.allColors = newValue.colors
             }
         }
         public var settings: SettingsView.State
-        public var colors: ColorsView.State
+        public var colors: ColorsFeatureView.State
 
         @BindableState
         var isSettingsPresented: Bool
@@ -42,7 +41,7 @@ extension AppView: AutoTCA {
         public init(
             tab: AppView.State.Tab = .home,
             settings: SettingsView.State,
-            colors: ColorsView.State,
+            colors: ColorsFeatureView.State,
             isSettingsPresented: Bool = false,
             isHelloWorldPresented: Bool = false,
             isColorsPresented: Bool = false
@@ -60,7 +59,7 @@ extension AppView: AutoTCA {
         case selectedTab(State.Tab)
         case home(HomeView.Action)
         case settings(SettingsView.Action)
-        case colors(ColorsView.Action)
+        case colors(ColorsFeatureView.Action)
 
         case binding(_ action: BindingAction<State>)
     }
@@ -86,8 +85,7 @@ public let appReducer = AppView.Reducer.combine(
             return .none
         case .settings:
             return .none
-        case let .colors(.tappedItem(color)):
-            print(color)
+        case .colors:
             return .none
         case .binding:
             return .none
@@ -103,13 +101,27 @@ public let appReducer = AppView.Reducer.combine(
         action: /AppView.Action.settings,
         environment: { _ in }
     ),
-    colorsReducer.pullback(
+    colorsFeatureReducer.pullback(
         state: \.colors,
         action: /AppView.Action.colors,
         environment: { _ in }
     )
-)
-    .binding()
+).combined(with: .init { state, action, environment in
+    // analytics reducer
+    switch action {
+    case let .selectedTab(selectedTabAction):
+        print("selectedTab action: \(selectedTabAction)")
+    case let .home(homeAction):
+        print("home action: \(homeAction)")
+    case let .settings(settingsAction):
+        print("settings action: \(settingsAction)")
+    case let .colors(colorsAction):
+        print("colors action: \(colorsAction)")
+    case let .binding(bindingAction):
+        print("binding action: \(bindingAction)")
+    }
+    return .none
+})
 
 public struct AppView: View {
     let store: Self.Store
@@ -146,14 +158,14 @@ public struct AppView: View {
                 }
                 .tag(State.Tab.settings)
                 
-//                ColorsCoordinatorView(store: store.scope(state: \.colors, action: Action.colors))
-//                    .tabItem {
-//                        Label("Colors", systemImage: "paintpalette.fill")
-//                    }
-//                    .tag(State.Tab.colors)
+                ColorsFeatureView(store: store.scope(state: \.colors, action: Action.colors))
+                    .tabItem {
+                        Label("Colors", systemImage: "paintpalette.fill")
+                    }
+                    .tag(State.Tab.colors)
             }
             .sheet(isPresented: viewStore.binding(\.$isColorsPresented)) {
-                ColorsView(store: store.scope(state: \.colors, action: Action.colors))
+                ColorsFeatureView(store: store.scope(state: \.colors, action: Action.colors))
             }
         }
     }
