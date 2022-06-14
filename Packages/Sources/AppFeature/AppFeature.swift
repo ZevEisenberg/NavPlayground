@@ -107,6 +107,7 @@ public let appReducer = AppView.Reducer.combine(
         environment: { _ in }
     )
 )
+    .binding()
 //    .combined(with: .init { state, action, environment in
 //    // analytics reducer
 //    switch action {
