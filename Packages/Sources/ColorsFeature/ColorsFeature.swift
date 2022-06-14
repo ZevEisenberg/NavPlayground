@@ -86,20 +86,10 @@ public struct ColorsFeatureView: View {
     public var body: some View {
         WithViewStore(store) { viewStore in
             ColorsListView(store: store.scope(state: \.list, action: Action.list))
-//                .sheet(
-//                    unwrapping: viewStore.binding(\.$picker),
-//                    content: { _ in
-//                        IfLetStore(store.scope(state: \.picker, action: Action.picker)) { store in
-//                            NavigationView {
-//                                ColorPickerView(store: store)
-//                            }
-//                        }
-//                    }
-//                )
-
                 .sheet(
-                    unwrapping: viewStore.binding(\.$picker),
-                    store: store.scope(state: \.picker, action: Action.picker)
+                    store: store,
+                    bindableState: \.$picker,
+                    bindableAction: Action.picker
                 ) { store in
                     NavigationView {
                         ColorPickerView(store: store)
