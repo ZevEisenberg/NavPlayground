@@ -105,25 +105,25 @@ public struct AppFeature: ReducerProtocol {
         }
 
         BindingReducer()
+
+        // analytics reducer
+        Reduce { state, action in
+            switch action {
+            case let .selectedTab(selectedTabAction):
+                print("selectedTab action: \(selectedTabAction)")
+            case let .home(homeAction):
+                print("home action: \(homeAction)")
+            case let .settings(settingsAction):
+                print("settings action: \(settingsAction)")
+            case let .colors(colorsAction):
+                print("colors action: \(colorsAction)")
+            case let .binding(bindingAction):
+                print("binding action: \(bindingAction)")
+            }
+            return .none
+        }
     }
 }
-
-//    .combined(with: .init { state, action, environment in
-//    // analytics reducer
-//    switch action {
-//    case let .selectedTab(selectedTabAction):
-//        print("selectedTab action: \(selectedTabAction)")
-//    case let .home(homeAction):
-//        print("home action: \(homeAction)")
-//    case let .settings(settingsAction):
-//        print("settings action: \(settingsAction)")
-//    case let .colors(colorsAction):
-//        print("colors action: \(colorsAction)")
-//    case let .binding(bindingAction):
-//        print("binding action: \(bindingAction)")
-//    }
-//    return .none
-//})
 
 public struct AppView: View {
     let store: StoreOf<AppFeature>
