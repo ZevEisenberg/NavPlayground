@@ -1,16 +1,15 @@
 import ComposableArchitecture
 import SwiftUI
-import AutoTCA
 import SettingsFeature
 
-extension HomeView: AutoTCA {
+public struct Home: ReducerProtocol {
 
     public struct State: Equatable {
-        public var settings: SettingsView.State
+        public var settings: Settings.State
         public var colors: [Color]
 
         public init(
-            settings: SettingsView.State,
+            settings: Settings.State,
             colors: [Color]
         ) {
             self.settings = settings
@@ -23,19 +22,23 @@ extension HomeView: AutoTCA {
         case goToColorsTapped
     }
 
+    public init() {}
+
+    public func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
+        .none
+    }
+
 }
 
-public let homeReducer = HomeView.Reducer.empty
-
 public struct HomeView: View {
-    let store: Self.Store
+    let store: StoreOf<Home>
 
-    public init(store: Self.Store) {
+    public init(store: StoreOf<Home>) {
         self.store = store
     }
 
     public var body: some View {
-        WithViewStore(store) { viewStore in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             Form {
                 Section {
                     Text("Foo: \(viewStore.settings.foo ? "✅" : "❌")")
@@ -77,13 +80,14 @@ public struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            HomeView(store: .init(
-                initialState: .init(
-                    settings: .init(foo: true, bar: false, baz: true),
-                    colors: [.red, .green, .blue, .orange]
-                ),
-                reducer: homeReducer,
-                environment: ())
+            HomeView(
+                store: .init(
+                    initialState: .init(
+                        settings: .init(foo: true, bar: false, baz: true),
+                        colors: [.red, .green, .blue, .orange]
+                    ),
+                    reducer: Home()
+                )
             )
         }
     }

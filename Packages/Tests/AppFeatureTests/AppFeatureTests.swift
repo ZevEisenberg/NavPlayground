@@ -8,9 +8,8 @@ final class AppFeatureTests: XCTestCase {
 
     func testPushSettings() {
         let store = TestStore(
-            initialState: .init(settings: .initial),
-            reducer: appReducer,
-            environment: ()
+            initialState: .init(settings: .initial, colors: .initial),
+            reducer: AppFeature()
         )
 
         store.send(.home(.goToSettingsTapped)) {
@@ -20,9 +19,8 @@ final class AppFeatureTests: XCTestCase {
 
     func testGoToSettingsTab() {
         let store = TestStore(
-            initialState: .init(settings: .initial),
-            reducer: appReducer,
-            environment: ()
+            initialState: .init(settings: .initial, colors: .initial),
+            reducer: AppFeature()
         )
 
         store.send(.selectedTab(.settings)) {
@@ -32,9 +30,8 @@ final class AppFeatureTests: XCTestCase {
 
     func testIntegration() {
         let store = TestStore(
-            initialState: .init(settings: .initial),
-            reducer: appReducer,
-            environment: ()
+            initialState: .init(settings: .initial, colors: .initial),
+            reducer: AppFeature()
         )
 
         store.send(.selectedTab(.settings)) {

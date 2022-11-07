@@ -1,17 +1,8 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.7
 
 import PackageDescription
 
 extension BuildItem {
-    // Infrastructure
-
-    static let autoTCA = BuildItem(
-        name: "AutoTCA",
-        dependencies: [
-            .composableArchitecture,
-        ]
-    )
-
     // Features
 
     static let rootFeature = BuildItem(
@@ -19,7 +10,6 @@ extension BuildItem {
         dependencies: [
             .splashPage,
             .appFeature,
-            .autoTCA,
         ]
     )
 
@@ -32,7 +22,6 @@ extension BuildItem {
     static let appFeature = BuildItem(
         name: "AppFeature",
         dependencies: [
-            .autoTCA,
             .composableArchitecture,
             .settingsFeature,
             .homeFeature,
@@ -43,7 +32,6 @@ extension BuildItem {
     static let homeFeature = BuildItem(
         name: "HomeFeature",
         dependencies: [
-            .autoTCA,
             .composableArchitecture,
             .settingsFeature,
             .colorsFeature,
@@ -53,7 +41,6 @@ extension BuildItem {
     static let settingsFeature = BuildItem(
         name: "SettingsFeature",
         dependencies: [
-            .autoTCA,
             .composableArchitecture,
         ]
     )
@@ -61,7 +48,6 @@ extension BuildItem {
     static let colorsFeature = BuildItem(
         name: "ColorsFeature",
         dependencies: [
-            BuildItem.autoTCA.dependency,
             .composableArchitecture,
             BuildItem.overture.dependency,
             BuildItem.swiftUINavigation.dependency,
@@ -75,7 +61,7 @@ extension BuildItem {
     }
 
     static var overture: BuildItem {
-        .init(name: "Overture", dependency: .product(name: "Overture", package: "overture"))
+        .init(name: "swift-overture", dependency: .product(name: "Overture", package: "swift-overture"))
     }
 
     static var swiftUINavigation: BuildItem {
@@ -85,7 +71,6 @@ extension BuildItem {
 
 let items: [BuildItem] = [
     .splashPage,
-    .autoTCA,
     .settingsFeature,
     .colorsFeature,
     .homeFeature,
@@ -111,14 +96,14 @@ extension Target.Dependency {
 let package = Package(
     name: "Packages",
     platforms: [
-        .iOS(.v15),
-        .macOS(.v12),
+        .iOS(.v16),
+        .macOS(.v13),
     ],
     products: items.map(\.library),
     dependencies: [
-        .package(name: "swift-composable-architecture", url: "https://github.com/pointfreeco/swift-composable-architecture", .exact("0.35.0")),
-        .package(name: "Overture", url: "https://github.com/pointfreeco/swift-overture", .upToNextMajor(from: "0.5.0")),
-        .package(name: "swiftui-navigation", url: "https://github.com/pointfreeco/swiftui-navigation", .exact("0.1.0")),
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "0.45.0"),
+        .package(url: "https://github.com/pointfreeco/swift-overture", exact: "0.5.0"),
+        .package(url: "https://github.com/pointfreeco/swiftui-navigation", exact: "0.3.0"),
     ],
     targets: items.map(\.target) + testTargets
 )

@@ -1,14 +1,12 @@
+import ComposableArchitecture
 import SwiftUI
 import RootFeature
 
 struct ContentView: View {
 
-    let store = RootView.Store(
+    let store = StoreOf<Root>(
         initialState: .init(),
-        reducer: rootReducer,
-        environment: .init(
-            mainQueue: .main
-        )
+        reducer: Root()
     )
 
     var body: some View {

@@ -1,22 +1,21 @@
 import ComposableArchitecture
 import Combine
 import SwiftUI
-import AutoTCA
 import AppFeature
 import SplashPage
 
-extension RootView: AutoTCA {
+public struct Root: ReducerProtocol {
     public struct State: Equatable {
         public enum Screen: Equatable {
             case splashPage
             case app
         }
         public var screen: Screen
-        public var app: AppView.State
+        public var app: AppFeature.State
         
         public init(
             screen: Screen = .splashPage,
-            app: AppView.State = .init(
+            app: AppFeature.State = .init(
                 tab: .home,
                 settings: .initial,
                 colors: .initial
@@ -30,55 +29,52 @@ extension RootView: AutoTCA {
     public enum Action: Equatable {
         case appear
         case moveFromSplashPageToApp
-        case app(AppView.Action)
+        case app(AppFeature.Action)
     }
 
-    public struct Environment {
-        var mainQueue: AnySchedulerOf<DispatchQueue>
-        public init(mainQueue: AnySchedulerOf<DispatchQueue>) {
-            self.mainQueue = mainQueue
+    @Dependency(\.continuousClock) var clock
+
+    public init() {}
+
+    public var body: some ReducerProtocolOf<Self> {
+        Scope(state: \.app, action: /Root.Action.app) {
+            AppFeature()
         }
+
+        Reduce { state, action in
+            switch action {
+            case .appear:
+                return .task {
+                    try await clock.sleep(for: .seconds(2))
+                    return .moveFromSplashPageToApp
+                }
+
+            case .moveFromSplashPageToApp:
+                state.screen = .app
+                return .none
+            case .app:
+                return .none
+            }
+        }
+        // TODO: how to add .debug?
     }
 }
 
-public let rootReducer: RootView.Reducer = .combine(
-    appReducer.pullback(
-        state: \.app,
-        action: /RootView.Action.app,
-        environment: { _ in }
-    ),
-    .init { state, action, environment in
-        switch action {
-        case .appear:
-            return Just(.moveFromSplashPageToApp)
-                .delay(for: .seconds(2), scheduler: environment.mainQueue.animation())
-                .eraseToEffect()
-
-        case .moveFromSplashPageToApp:
-            state.screen = .app
-            return .none
-        case .app:
-            return .none
-        }
-    }
-)
-    .debug()
-
 public struct RootView: View {
-    let store: Self.Store
+    let store: StoreOf<Root>
 
-    public init(store: Self.Store) {
+    public init(store: StoreOf<Root>) {
         self.store = store
     }
 
     public var body: some View {
-        WithViewStore(store) { viewStore in
+        WithViewStore(store, observe: \.screen) { viewStore in
             Group {
-                switch viewStore.screen {
+                switch viewStore.state {
                 case .splashPage:
                     SplashPageView()
                 case .app:
-                    AppView(store: store.scope(state: \.app, action: Action.app))
+                    AppView(store: store.scope(state: \.app, action: Root.Action.app))
                 }
             }
             .onAppear {

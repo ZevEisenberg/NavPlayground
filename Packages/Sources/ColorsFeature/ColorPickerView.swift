@@ -1,8 +1,7 @@
-import AutoTCA
 import ComposableArchitecture
 import SwiftUI
 
-extension ColorPickerView: AutoTCA {
+public struct ColorPickerFeature: ReducerProtocol {
     public struct State: Equatable {
         let colorIndex: ColorIndex
     }
@@ -11,17 +10,22 @@ extension ColorPickerView: AutoTCA {
         case dismiss
         case picked(Color)
     }
+
+    public func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
+        .none
+    }
+
 }
 
 public struct ColorPickerView: View {
-    let store: Self.Store
+    let store: StoreOf<ColorPickerFeature>
 
-    public init(store: Self.Store) {
+    public init(store: StoreOf<ColorPickerFeature>) {
         self.store = store
     }
 
     public var body: some View {
-        WithViewStore(store) { viewStore in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             VStack {
                 HStack {
                     Button {

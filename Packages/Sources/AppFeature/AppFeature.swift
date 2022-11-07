@@ -1,11 +1,10 @@
 import ComposableArchitecture
 import SwiftUI
-import AutoTCA
 import SettingsFeature
 import HomeFeature
 import ColorsFeature
 
-extension AppView: AutoTCA {
+public struct AppFeature: ReducerProtocol {
     public struct State: Equatable {
         public enum Tab: Equatable {
             case home
@@ -14,7 +13,7 @@ extension AppView: AutoTCA {
         }
 
         public var tab: Tab
-        public var home: HomeView.State {
+        public var home: Home.State {
             get {
                 .init(
                     settings: settings,
@@ -26,8 +25,8 @@ extension AppView: AutoTCA {
                 colors.list.allColors = newValue.colors
             }
         }
-        public var settings: SettingsView.State
-        public var colors: ColorsFeatureView.State
+        public var settings: Settings.State
+        public var colors: ColorsFeature.State
 
         @BindableState
         var isSettingsPresented: Bool
@@ -39,9 +38,9 @@ extension AppView: AutoTCA {
         var isColorsPresented: Bool
 
         public init(
-            tab: AppView.State.Tab = .home,
-            settings: SettingsView.State,
-            colors: ColorsFeatureView.State,
+            tab: AppFeature.State.Tab = .home,
+            settings: Settings.State,
+            colors: ColorsFeature.State,
             isSettingsPresented: Bool = false,
             isHelloWorldPresented: Bool = false,
             isColorsPresented: Bool = false
@@ -57,57 +56,58 @@ extension AppView: AutoTCA {
 
     public enum Action: Equatable, BindableAction {
         case selectedTab(State.Tab)
-        case home(HomeView.Action)
-        case settings(SettingsView.Action)
-        case colors(ColorsFeatureView.Action)
+        case home(Home.Action)
+        case settings(Settings.Action)
+        case colors(ColorsFeature.Action)
 
         case binding(_ action: BindingAction<State>)
     }
+
+    public init() {}
+
+    public var body: some ReducerProtocolOf<Self> {
+        Reduce { state, action in
+            switch action {
+            case .selectedTab(let tab):
+                state.tab = tab
+                return .none
+            case .home(.goToSettingsTapped):
+                state.isSettingsPresented = true
+                return .none
+            case .home(.goToColorsTapped):
+                state.isColorsPresented = true
+                return .none
+            case .settings(.sayHelloTapped):
+                state.isHelloWorldPresented = true
+                return .none
+            case .settings(.gotoColorsTapped):
+                state.isColorsPresented = true
+                return .none
+            case .settings:
+                return .none
+            case .colors:
+                return .none
+            case .binding:
+                return .none
+            }
+        }
+
+        Scope(state: \.home, action: /AppFeature.Action.home) {
+            Home()
+        }
+
+        Scope(state: \.settings, action: /AppFeature.Action.settings) {
+            Settings()
+        }
+
+        Scope(state: \.colors, action: /AppFeature.Action.colors) {
+            ColorsFeature()
+        }
+
+        BindingReducer()
+    }
 }
 
-public let appReducer = AppView.Reducer.combine(
-    .init { state, action, _ in
-        switch action {
-        case .selectedTab(let tab):
-            state.tab = tab
-            return .none
-        case .home(.goToSettingsTapped):
-            state.isSettingsPresented = true
-            return .none
-        case .home(.goToColorsTapped):
-            state.isColorsPresented = true
-            return .none
-        case .settings(.sayHelloTapped):
-            state.isHelloWorldPresented = true
-            return .none
-        case .settings(.gotoColorsTapped):
-            state.isColorsPresented = true
-            return .none
-        case .settings:
-            return .none
-        case .colors:
-            return .none
-        case .binding:
-            return .none
-        }
-    },
-    homeReducer.pullback(
-        state: \.home,
-        action: /AppView.Action.home,
-        environment: { _ in }
-    ),
-    settingsReducer.pullback(
-        state: \.settings,
-        action: /AppView.Action.settings,
-        environment: { _ in }
-    ),
-    colorsFeatureReducer.pullback(
-        state: \.colors,
-        action: /AppView.Action.colors,
-        environment: { _ in }
-    )
-)
-    .binding()
 //    .combined(with: .init { state, action, environment in
 //    // analytics reducer
 //    switch action {
@@ -126,14 +126,17 @@ public let appReducer = AppView.Reducer.combine(
 //})
 
 public struct AppView: View {
-    let store: Self.Store
+    let store: StoreOf<AppFeature>
 
-    public init(store: Self.Store) {
+    public init(store: StoreOf<AppFeature>) {
         self.store = store
     }
 
+    typealias State = AppFeature.State
+    typealias Action = AppFeature.Action
+
     public var body: some View {
-        WithViewStore(store) { viewStore in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             TabView(
                 selection: viewStore.binding(get: \.tab, send: Action.selectedTab)
             ) {
@@ -173,7 +176,7 @@ public struct AppView: View {
     }
 
     @ViewBuilder
-    private func settingsView(viewStore: Self.ViewStore) -> some View {
+    private func settingsView(viewStore: ViewStoreOf<AppFeature>) -> some View {
         SettingsView(store: store.scope(state: \.settings, action: Action.settings))
             .overlay {
                 NavigationLink(isActive: viewStore.binding(\.$isHelloWorldPresented), destination: {
@@ -193,8 +196,7 @@ struct TabBarView_Previews: PreviewProvider {
                     settings: .initial,
                     colors: .initial
                 ),
-                reducer: appReducer,
-                environment: ()
+                reducer: AppFeature()
             )
         )
     }

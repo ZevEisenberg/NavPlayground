@@ -1,8 +1,7 @@
 import SwiftUI
-import AutoTCA
 import ComposableArchitecture
 
-extension ColorsListView: AutoTCA {
+public struct ColorsList: ReducerProtocol {
     public struct State: Equatable {
         public var color0: Color
         public var color1: Color
@@ -29,18 +28,22 @@ extension ColorsListView: AutoTCA {
     public enum Action: Equatable {
         case tappedItem(ColorIndex)
     }
+
+    public func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
+        .none
+    }
 }
 
 public struct ColorsListView: View {
 
-    let store: Self.Store
+    let store: StoreOf<ColorsList>
 
-    public init(store: Self.Store) {
+    public init(store: StoreOf<ColorsList>) {
         self.store = store
     }
 
     public var body: some View {
-        WithViewStore(store) { viewStore in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             VStack {
                 Button {
                     viewStore.send(.tappedItem(.color0))

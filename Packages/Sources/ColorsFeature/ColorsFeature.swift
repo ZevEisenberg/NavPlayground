@@ -1,6 +1,5 @@
 import ComposableArchitecture
 import SwiftUI
-import AutoTCA
 import SwiftUINavigation
 
 public enum ColorIndex: Int, Identifiable {
@@ -14,16 +13,16 @@ public enum ColorIndex: Int, Identifiable {
     }
 }
 
-extension ColorsFeatureView: AutoTCA {
+public struct ColorsFeature: ReducerProtocol {
     public struct State: Equatable {
-        public var list: ColorsListView.State
+        public var list: ColorsList.State
 
         @BindableState
-        public var picker: ColorPickerView.State?
+        public var picker: ColorPickerFeature.State?
 
         public init(
-            root: ColorsListView.State,
-            picker: ColorPickerView.State? = nil
+            root: ColorsList.State,
+            picker: ColorPickerFeature.State? = nil
         ) {
             self.list = root
             self.picker = picker
@@ -35,61 +34,66 @@ extension ColorsFeatureView: AutoTCA {
     }
 
     public enum Action: Equatable, BindableAction {
-        case list(ColorsListView.Action)
-        case picker(ColorPickerView.Action)
+        case list(ColorsList.Action)
+        case picker(ColorPickerFeature.Action)
 
         case binding(_ action: BindingAction<State>)
     }
-}
 
-public let colorsFeatureReducer = ColorsFeatureView.Reducer { state, action, _ in
-    switch action {
-    case let .list(.tappedItem(item)):
-        state.picker = .init(colorIndex: item)
-        return .none
+    public init() {}
 
-    case .picker(.dismiss):
-        state.picker = nil
-        return .none
+    public var body: some ReducerProtocolOf<Self> {
+        Reduce { state, action in
+            switch action {
+            case let .list(.tappedItem(item)):
+                state.picker = .init(colorIndex: item)
+                return .none
 
-    case let .picker(.picked(color)):
-        defer { state.picker = nil }
-        guard let colorIndex = state.picker?.colorIndex else {
-            return .none
+            case .picker(.dismiss):
+                state.picker = nil
+                return .none
+
+            case let .picker(.picked(color)):
+                defer { state.picker = nil }
+                guard let colorIndex = state.picker?.colorIndex else {
+                    return .none
+                }
+                switch colorIndex {
+                case .color0:
+                    state.list.color0 = color
+                case .color1:
+                    state.list.color1 = color
+                case .color2:
+                    state.list.color2 = color
+                case .color3:
+                    state.list.color3 = color
+                }
+                return .none
+
+            case .binding:
+                return .none
+            }
         }
-        switch colorIndex {
-        case .color0:
-            state.list.color0 = color
-        case .color1:
-            state.list.color1 = color
-        case .color2:
-            state.list.color2 = color
-        case .color3:
-            state.list.color3 = color
-        }
-        return .none
 
-    case .binding:
-        return .none
+        BindingReducer()
     }
 }
-    .binding()
 
 public struct ColorsFeatureView: View {
 
-    let store: Self.Store
+    let store: StoreOf<ColorsFeature>
 
-    public init(store: Self.Store) {
+    public init(store: StoreOf<ColorsFeature>) {
         self.store = store
     }
 
     public var body: some View {
         WithViewStore(store) { viewStore in
-            ColorsListView(store: store.scope(state: \.list, action: Action.list))
+            ColorsListView(store: store.scope(state: \.list, action: ColorsFeature.Action.list))
                 .sheet(
                     store: store,
                     bindableState: \.$picker,
-                    bindableAction: Action.picker
+                    bindableAction: ColorsFeature.Action.picker
                 ) { store in
                     NavigationView {
                         ColorPickerView(store: store)
@@ -103,10 +107,11 @@ public struct ColorsFeatureView: View {
 struct ColorsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ColorsFeatureView(store: .init(
-                initialState: .initial,
-                reducer: colorsFeatureReducer,
-                environment: ())
+            ColorsFeatureView(
+                store: .init(
+                    initialState: .initial,
+                    reducer: ColorsFeature()
+                )
             )
         }
     }

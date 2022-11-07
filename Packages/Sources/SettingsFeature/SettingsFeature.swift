@@ -1,8 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
-import AutoTCA
 
-extension SettingsView: AutoTCA {
+public struct Settings: ReducerProtocol {
     public struct State: Equatable {
         @BindableState public var foo: Bool
         @BindableState public var bar: Bool
@@ -20,22 +19,26 @@ extension SettingsView: AutoTCA {
     public enum Action: BindableAction, Equatable {
         case gotoColorsTapped
         case sayHelloTapped
-        case binding(BindingAction<SettingsView.State>)
+        case binding(BindingAction<State>)
+    }
+
+    public init() {}
+
+    public var body: some ReducerProtocolOf<Self> {
+        BindingReducer()
     }
 }
 
-public let settingsReducer: SettingsView.Reducer = .empty.binding()
-
 public struct SettingsView: View {
 
-    let store: Self.Store
+    let store: StoreOf<Settings>
 
-    public init(store: Self.Store) {
+    public init(store: StoreOf<Settings>) {
         self.store = store
     }
 
     public var body: some View {
-        WithViewStore(store) { viewStore in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             Form {
                 Section {
                     Toggle("Foo", isOn: viewStore.binding(\.$foo))
@@ -62,10 +65,11 @@ public struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            SettingsView(store: .init(
-                initialState: .init(foo: true, bar: true, baz: false),
-                reducer: settingsReducer,
-                environment: ())
+            SettingsView(
+                store: .init(
+                    initialState: .init(foo: true, bar: true, baz: false),
+                    reducer: Settings()
+                )
             )
         }
     }
