@@ -56,7 +56,6 @@ public struct Root: ReducerProtocol {
                 return .none
             }
         }
-        ._printChanges()
     }
 }
 

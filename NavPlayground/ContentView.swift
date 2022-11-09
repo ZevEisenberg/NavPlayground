@@ -6,7 +6,7 @@ struct ContentView: View {
 
     let store = StoreOf<Root>(
         initialState: .init(),
-        reducer: Root()
+        reducer: Root()._printChanges()
     )
 
     var body: some View {
