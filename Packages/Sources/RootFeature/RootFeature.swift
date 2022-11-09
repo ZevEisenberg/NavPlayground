@@ -56,7 +56,7 @@ public struct Root: ReducerProtocol {
                 return .none
             }
         }
-        // TODO: how to add .debug?
+        ._printChanges()
     }
 }
 
