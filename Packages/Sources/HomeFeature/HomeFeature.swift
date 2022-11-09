@@ -58,7 +58,7 @@ public struct HomeView: View {
 
                 Section {
                     HStack {
-                        ForEach(viewStore.colors, id: \.self) { color in
+                        ForEach(Array(zip(viewStore.colors.indices, viewStore.colors)), id: \.0) { _, color in
                             color
                         }
                     }
