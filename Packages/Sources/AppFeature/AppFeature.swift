@@ -5,14 +5,31 @@ import HomeFeature
 import ColorsFeature
 
 public struct AppFeature: ReducerProtocol {
-    public struct State: Equatable {
-        public enum Tab: Equatable {
-            case home
-            case settings
-            case colors
-        }
 
+    public enum Tab: Equatable {
+        case home
+        case settings
+        case colors
+    }
+
+    public enum HomeDestination {
+        case settings
+        case helloWorld
+    }
+
+    public enum SettingsDestination {
+        case sayHello
+    }
+
+    public struct State: Equatable {
         public var tab: Tab
+
+        @BindableState
+        var homeNavPath: NavigationPath
+
+        @BindableState
+        var settingsNavPath: NavigationPath
+
         public var home: Home.State {
             get {
                 .init(
@@ -29,33 +46,27 @@ public struct AppFeature: ReducerProtocol {
         public var colors: ColorsFeature.State
 
         @BindableState
-        var isSettingsPresented: Bool
-
-        @BindableState
-        var isHelloWorldPresented: Bool
-
-        @BindableState
         var isColorsPresented: Bool
 
         public init(
-            tab: AppFeature.State.Tab = .home,
+            tab: AppFeature.Tab = .home,
+            homeNavPath: NavigationPath = NavigationPath(),
+            settingsNavPath: NavigationPath = NavigationPath(),
             settings: Settings.State,
             colors: ColorsFeature.State,
-            isSettingsPresented: Bool = false,
-            isHelloWorldPresented: Bool = false,
             isColorsPresented: Bool = false
         ) {
             self.tab = tab
+            self.homeNavPath = homeNavPath
+            self.settingsNavPath = settingsNavPath
             self.settings = settings
             self.colors = colors
-            self.isSettingsPresented = isSettingsPresented
-            self.isHelloWorldPresented = isHelloWorldPresented
             self.isColorsPresented = isColorsPresented
         }
     }
 
     public enum Action: Equatable, BindableAction {
-        case selectedTab(State.Tab)
+        case selectedTab(Tab)
         case home(Home.Action)
         case settings(Settings.Action)
         case colors(ColorsFeature.Action)
@@ -72,13 +83,20 @@ public struct AppFeature: ReducerProtocol {
                 state.tab = tab
                 return .none
             case .home(.goToSettingsTapped):
-                state.isSettingsPresented = true
+                state.homeNavPath.append(HomeDestination.settings)
                 return .none
             case .home(.goToColorsTapped):
                 state.isColorsPresented = true
                 return .none
             case .settings(.sayHelloTapped):
-                state.isHelloWorldPresented = true
+                switch state.tab {
+                case .home:
+                    state.homeNavPath.append(HomeDestination.helloWorld)
+                case .settings:
+                    state.settingsNavPath.append(SettingsDestination.sayHello)
+                case .colors:
+                    break
+                }
                 return .none
             case .settings(.gotoColorsTapped):
                 state.isColorsPresented = true
@@ -140,34 +158,42 @@ public struct AppView: View {
             TabView(
                 selection: viewStore.binding(get: \.tab, send: Action.selectedTab)
             ) {
-                NavigationView {
+                NavigationStack(path: viewStore.binding(\.$homeNavPath)) {
                     HomeView(store: store.scope(state: \.home, action: Action.home))
-                        .overlay {
-                            NavigationLink(isActive: viewStore.binding(\.$isSettingsPresented), destination: {
-                                settingsView(viewStore: viewStore)
-                            }, label: EmptyView.init)
-                            .hidden()
+                        .navigationDestination(for: AppFeature.HomeDestination.self) { destination in
+                            switch destination {
+                            case .settings:
+                                SettingsView(store: store.scope(state: \.settings, action: Action.settings))
+                            case .helloWorld:
+                                HelloWorldView()
+                            }
                         }
-
                 }
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
-                .tag(State.Tab.home)
+                .tag(AppFeature.Tab.home)
 
-                NavigationView {
-                    settingsView(viewStore: viewStore)
+                NavigationStack(path: viewStore.binding(\.$settingsNavPath)) {
+                    SettingsView(store: store.scope(state: \.settings, action: Action.settings))
+                        .navigationDestination(for: AppFeature.SettingsDestination.self) { destination in
+                            switch destination {
+                            case .sayHello:
+                                HelloWorldView()
+                            }
+                        }
+
                 }
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
-                .tag(State.Tab.settings)
+                .tag(AppFeature.Tab.settings)
                 
                 ColorsFeatureView(store: store.scope(state: \.colors, action: Action.colors))
                     .tabItem {
                         Label("Colors", systemImage: "paintpalette.fill")
                     }
-                    .tag(State.Tab.colors)
+                    .tag(AppFeature.Tab.colors)
             }
             .sheet(isPresented: viewStore.binding(\.$isColorsPresented)) {
                 ColorsFeatureView(store: store.scope(state: \.colors, action: Action.colors))
@@ -175,16 +201,6 @@ public struct AppView: View {
         }
     }
 
-    @ViewBuilder
-    private func settingsView(viewStore: ViewStoreOf<AppFeature>) -> some View {
-        SettingsView(store: store.scope(state: \.settings, action: Action.settings))
-            .overlay {
-                NavigationLink(isActive: viewStore.binding(\.$isHelloWorldPresented), destination: {
-                    HelloWorldView()
-                }, label: EmptyView.init)
-                .hidden()
-            }
-    }
 }
 
 struct TabBarView_Previews: PreviewProvider {

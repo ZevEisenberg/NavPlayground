@@ -13,7 +13,7 @@ final class AppFeatureTests: XCTestCase {
         )
 
         store.send(.home(.goToSettingsTapped)) {
-            $0.isSettingsPresented = true
+            $0.homeNavPath.append(AppFeature.HomeDestination.settings)
         }
     }
 
