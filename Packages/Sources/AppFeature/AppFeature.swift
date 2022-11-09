@@ -126,17 +126,20 @@ public struct AppFeature: ReducerProtocol {
 
         // analytics reducer
         Reduce { state, action in
+            func analyticsPrint(_ message: String) {
+                print("👣 \(message)")
+            }
             switch action {
             case let .selectedTab(selectedTabAction):
-                print("selectedTab action: \(selectedTabAction)")
+                analyticsPrint("selectedTab action: \(selectedTabAction)")
             case let .home(homeAction):
-                print("home action: \(homeAction)")
+                analyticsPrint("home action: \(homeAction)")
             case let .settings(settingsAction):
-                print("settings action: \(settingsAction)")
+                analyticsPrint("settings action: \(settingsAction)")
             case let .colors(colorsAction):
-                print("colors action: \(colorsAction)")
+                analyticsPrint("colors action: \(colorsAction)")
             case let .binding(bindingAction):
-                print("binding action: \(bindingAction)")
+                analyticsPrint("binding action: \(bindingAction)")
             }
             return .none
         }
